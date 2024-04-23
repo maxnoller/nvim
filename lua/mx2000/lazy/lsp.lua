@@ -41,20 +41,6 @@ return {
                     }
                 end,
 
-                ["lua_ls"] = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.lua_ls.setup {
-                        capabilities = capabilities,
-                        settings = {
-                            Lua = {
-				    runtime = { version = "Lua 5.1" },
-                                diagnostics = {
-                                    globals = { "vim", "it", "describe", "before_each", "after_each" },
-                                }
-                            }
-                        }
-                    }
-                end,
                 ["pyright"] = function()
                     local lspconfig =  require("lspconfig")
                     local util = require("lspconfig/util")
@@ -69,16 +55,21 @@ return {
                         local match = vim.fn.glob(path.join(workspace, 'poetry.lock'))
                           if match ~= '' then
                             local venv = vim.fn.trim(vim.fn.system('poetry env info -p'))
-                            return path.join(venv, 'bin', 'python')
+                            if venv ~= '' then
+                                if vim.fn.has("macunix") == 1 then
+                                return path.join(venv, 'bin', 'python')
+                                else
+                                return path.join(venv, 'Scripts', 'python.exe')
+                                end
+                            end
                           end
 
                       -- Fallback to system Python.
-                      return exepath('python3') or exepath('python') or 'python'
+                      return vim.fn.exepath('python3') or vim.fn.exepath('python') or 'python'
                     end
 
                     lspconfig.pyright.setup {
                           capabilities = capabilities,
-                          on_attach = on_attach,
                           before_init = function(_,config)
                             config.settings.python.pythonPath = get_python_path(config.root_dir)
                           end
