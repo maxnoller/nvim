@@ -29,6 +29,8 @@ return {
 				async = false,
 				timeout_ms = 1000,
 			})
+
+        vim.api.nvim_create_autocmd("BufWritePre")
 		end, { desc = "Format file or range (in visual mode)" })
 	end,
 }
