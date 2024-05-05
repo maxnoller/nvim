@@ -62,7 +62,9 @@ return {
                 lspconfig.pyright.setup {
                       capabilities = capabilities,
                       before_init = function(_,config)
-                        config.settings.python.pythonPath = util.get_python_interpreter()
+                        if vim.bo.filetype == "python" then
+                            config.settings.python.pythonPath = util.get_python_interpreter()
+                        end
                       end
                     }
             end,
