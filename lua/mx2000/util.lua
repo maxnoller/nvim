@@ -13,7 +13,7 @@ local function interpreter_os(base_path)
 end
 
 local function find_workspace()
-    local current_dir = vim.fn.getcwd()
+    local current_dir = vim.fn.expand('%:p:h')
     local git_dir = current_dir
     while git_dir ~= '/' do
         if vim.fn.isdirectory(git_dir .. "/.git") == 1 then
@@ -31,12 +31,14 @@ function M.get_python_interpreter()
 
     local workspace = find_workspace()
 
-    -- Find and use virtualenv in workspace directory.
-    local match = vim.fn.glob(path_join(workspace, 'poetry.lock'))
-    if match ~= '' then
-        local venv = vim.fn.trim(vim.fn.system('poetry env info -p'))
-        if venv ~= '' then
-            return interpreter_os(venv)
+    if workspace then
+        -- Find and use virtualenv in workspace directory.
+        local match = vim.fn.glob(path_join(workspace, 'poetry.lock'))
+        if match ~= '' then
+            local venv = vim.fn.trim(vim.fn.system('poetry env info -p'))
+            if venv ~= '' then
+                return interpreter_os(venv)
+            end
         end
     end
 
