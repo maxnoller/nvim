@@ -5,20 +5,20 @@ return {
 		local lint = require("lint")
 
 		lint.linters_by_ft = {
-			javascript = { "eslint" },
-			typescript = { "eslint" },
-			javascriptreact = { "eslint" },
-			typescriptreact = { "eslint" },
-			svelte = { "eslint" },
+			javascript = { "eslint_d" },
+			typescript = { "eslint_d" },
+			javascriptreact = { "eslint_d" },
+			typescriptreact = { "eslint_d" },
+			svelte = { "eslint_d" },
 			python = { "pylint" },
 		}
 
 		local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
 
-            local util = require("mx2000.util")
+		local util = require("mx2000.util")
 
-            lint.linters.pylint.cmd = util.get_python_interpreter()
-            lint.linters.pylint.args = { "-m", "pylint", "-f", "json" }
+		lint.linters.pylint.cmd = util.get_python_interpreter()
+		lint.linters.pylint.args = { "-m", "pylint", "-f", "json" }
 
 		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
 			group = lint_augroup,
