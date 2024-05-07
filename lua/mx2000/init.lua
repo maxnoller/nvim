@@ -6,6 +6,19 @@ vim.cmd("colorscheme carbonfox")
 
 local autocmd = vim.api.nvim_create_autocmd
 
+local augroup = vim.api.nvim_create_augroup
+local MX2000_GROUP = augroup("MX2000", {})
+
+vim.api.nvim_create_autocmd({ "FocusGained" }, {
+	pattern = { "*" },
+	command = [[call setreg("@", getreg("+"))]],
+})
+
+-- sync with system clipboard on focus
+vim.api.nvim_create_autocmd({ "FocusLost" }, {
+	pattern = { "*" },
+	command = [[call setreg("+", getreg("@"))]],
+})
 vim.g["codegpt_openai_api_key"] = vim.fn.system("bw get password OAI_API_KEY")
 autocmd("LspAttach", {
 	group = MX2000_GROUP,
