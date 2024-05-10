@@ -16,7 +16,7 @@ local function find_workspace()
 	local current_dir = vim.fn.expand("%:p:h")
 	local git_dir = current_dir
 	while git_dir ~= "/" do
-		if vim.fn.isdirectory(git_dir .. "/.git") == 1 then
+		if vim.fn.isdirectory(git_dir .. "/.git") == 1 or vim.fn.filereadable(git_dir .. "/pyproject.toml") == 1 then
 			return git_dir
 		end
 		git_dir = vim.fn.fnamemodify(git_dir, ":h")
