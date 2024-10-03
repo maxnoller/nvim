@@ -12,41 +12,35 @@ local function interpreter_os(base_path)
 	end
 end
 
-local function find_workspace()
-	local current_dir = vim.fn.expand("%:p:h")
-	local git_dir = current_dir
-	local max_depth = 3
-	local depth = 0
-
-	while git_dir ~= "/" and depth < max_depth do
-		if vim.fn.isdirectory(git_dir .. "/.git") == 1 or vim.fn.filereadable(git_dir .. "/pyproject.toml") == 1 then
-			return git_dir
+function M.find_pyproject_toml(start_path)
+	local current_dir = start_path
+	while current_dir ~= "/" do
+		local pyproject_path = path_join(current_dir, "pyproject.toml")
+		if vim.fn.filereadable(pyproject_path) == 1 then
+			return current_dir
 		end
-		git_dir = vim.fn.fnamemodify(git_dir, ":h")
-		depth = depth + 1
+		current_dir = vim.fn.fnamemodify(current_dir, ":h")
 	end
 	return nil
 end
 
-function M.get_python_interpreter()
+function M.get_python_interpreter(file_path)
 	if vim.env.VIRTUAL_ENV then
 		return interpreter_os(vim.env.VIRTUAL_ENV)
 	end
 
-	local workspace = find_workspace()
-
-	if workspace then
-		-- Find and use virtualenv in workspace directory.
-		local match = vim.fn.glob(path_join(workspace, "poetry.lock"))
-		if match ~= "" then
-			local venv = vim.fn.trim(vim.fn.system("poetry env info -p"))
+	local project_root = M.find_pyproject_toml(vim.fn.fnamemodify(file_path, ":p:h"))
+	if project_root then
+		local poetry_lock = path_join(project_root, "poetry.lock")
+		if vim.fn.filereadable(poetry_lock) == 1 then
+			local venv = vim.fn.trim(vim.fn.system("cd " .. project_root .. " && poetry env info -p"))
 			if venv ~= "" then
 				return interpreter_os(venv)
 			end
 		end
 	end
 
-	-- Fallback to system Python.
+	-- Fallback to system Python
 	return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
 end
 

@@ -11,15 +11,15 @@ return {
 		"saadparwaiz1/cmp_luasnip",
 		"j-hui/fidget.nvim",
 	},
-
 	config = function()
 		local cmp = require("cmp")
 		local cmp_lsp = require("cmp_nvim_lsp")
 		local lspconfig = require("lspconfig")
 		local mason_lspconfig = require("mason-lspconfig")
-
+		local util = require("mx2000.util") -- Your utility module
 		require("fidget").setup({})
 		local capabilities = cmp_lsp.default_capabilities()
+
 		mason_lspconfig.setup_handlers({
 			function(server_name)
 				lspconfig[server_name].setup({
@@ -30,18 +30,15 @@ return {
 				local svelte_caps = vim.lsp.protocol.make_client_capabilities()
 				svelte_caps.workspace.didChangeWatchedFiles.dynamicRegistration = true
 				svelte_caps.textDocument.completion = capabilities.textDocument.completion
-				-- configure svelte server
 				lspconfig["svelte"].setup({
 					capabilities = svelte_caps,
 				})
 			end,
 			["lua_ls"] = function()
-				-- configure lua server (with special settings)
 				lspconfig["lua_ls"].setup({
 					capabilities = capabilities,
 					settings = {
 						Lua = {
-							-- make the language server recognize "vim" global
 							diagnostics = {
 								globals = { "vim" },
 							},
@@ -53,24 +50,24 @@ return {
 				})
 			end,
 			["pyright"] = function()
-				local util = require("mx2000.util")
-
 				lspconfig.pyright.setup({
 					capabilities = capabilities,
-					before_init = function(_, config)
-						if vim.bo.filetype == "python" then
-							config.settings.python.pythonPath = util.get_python_interpreter()
-						end
+					on_init = function(client)
+						local file_path = client.config.root_dir
+						client.config.settings.python.pythonPath = util.get_python_interpreter(file_path)
+					end,
+					root_dir = function(fname)
+						return util.find_pyproject_toml(vim.fn.fnamemodify(fname, ":p:h")) or vim.fn.getcwd()
 					end,
 				})
 			end,
 		})
-		local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
+		local cmp_select = { behavior = cmp.SelectBehavior.Select }
 		cmp.setup({
 			snippet = {
 				expand = function(args)
-					require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
+					require("luasnip").lsp_expand(args.body)
 				end,
 			},
 			mapping = cmp.mapping.preset.insert({
@@ -88,7 +85,6 @@ return {
 		})
 
 		vim.diagnostic.config({
-			-- update_in_insert = true,
 			float = {
 				focusable = false,
 				style = "minimal",
