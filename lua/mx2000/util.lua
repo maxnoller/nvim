@@ -37,7 +37,6 @@ function M.get_python_interpreter(file_path)
 		if vim.fn.isdirectory(uv_venv) == 1 then
 			return interpreter_os(uv_venv)
 		end
-
 		-- Check for poetry
 		local poetry_lock = path_join(project_root, "poetry.lock")
 		if vim.fn.filereadable(poetry_lock) == 1 then

@@ -14,53 +14,59 @@ return {
 	config = function()
 		local cmp = require("cmp")
 		local cmp_lsp = require("cmp_nvim_lsp")
-		local lspconfig = require("lspconfig")
-		local mason_lspconfig = require("mason-lspconfig")
-		local util = require("mx2000.util") -- Your utility module
+		local util = require("mx2000.util")
 		require("fidget").setup({})
-		local capabilities = cmp_lsp.default_capabilities()
+		local capabilities = vim.tbl_deep_extend(
+			"force",
+			{},
+			vim.lsp.protocol.make_client_capabilities(),
+			cmp_lsp.default_capabilities()
+		)
 
-		mason_lspconfig.setup_handlers({
-			function(server_name)
-				lspconfig[server_name].setup({
-					capabilities = capabilities,
-				})
-			end,
-			["svelte"] = function()
-				local svelte_caps = vim.lsp.protocol.make_client_capabilities()
-				svelte_caps.workspace.didChangeWatchedFiles.dynamicRegistration = true
-				svelte_caps.textDocument.completion = capabilities.textDocument.completion
-				lspconfig["svelte"].setup({
-					capabilities = svelte_caps,
-				})
-			end,
-			["lua_ls"] = function()
-				lspconfig["lua_ls"].setup({
-					capabilities = capabilities,
-					settings = {
-						Lua = {
-							diagnostics = {
-								globals = { "vim" },
-							},
-							completion = {
-								callSnippet = "Replace",
+		local mason_lspconfig = require("mason-lspconfig").setup({
+			ensure_installed = {
+				"tsserver",
+				"html",
+				"cssls",
+				"tailwindcss",
+				"lua_ls",
+				"svelte",
+				"lua_ls",
+				"basedpyright",
+			},
+			handlers = {
+				function(server_name)
+					require("lspconfig")[server_name].setup({
+						capabilities = capabilities,
+					})
+				end,
+				["lua_ls"] = function()
+					local lspconfig = require("lspconfig")
+					lspconfig.lua_ls.setup({
+						capabilities = capabilities,
+						settings = {
+							Lua = {
+								runtime = { version = "Lua 5.1" },
+								diagnostics = {
+									globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
+								},
 							},
 						},
-					},
-				})
-			end,
-			["basedpyright"] = function()
-				lspconfig.pyright.setup({
-					capabilities = capabilities,
-					on_init = function(client)
-						local file_path = client.config.root_dir
-						client.config.settings.python.pythonPath = util.get_python_interpreter(file_path)
-					end,
-					root_dir = function(fname)
-						return util.find_pyproject_toml(vim.fn.fnamemodify(fname, ":p:h")) or vim.fn.getcwd()
-					end,
-				})
-			end,
+					})
+				end,
+				["basedpyright"] = function()
+					local lspconfig = require("lspconfig")
+					lspconfig.basedpyright.setup({
+						capabilities = capabilities,
+						on_attach = function(client)
+							local file_path = client.config.root_dir
+							lspconfig.basedpyright.commands.PyrightSetPythonPath[1](
+								util.get_python_interpreter(file_path)
+							)
+						end,
+					})
+				end,
+			},
 		})
 
 		local cmp_select = { behavior = cmp.SelectBehavior.Select }
