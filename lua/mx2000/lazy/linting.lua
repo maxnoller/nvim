@@ -10,15 +10,10 @@ return {
 			javascriptreact = { "eslint_d" },
 			typescriptreact = { "eslint_d" },
 			svelte = { "eslint_d" },
-			python = { "pylint" },
+			python = { "ruff" },
 		}
 
 		local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
-
-		local util = require("mx2000.util")
-
-		lint.linters.pylint.cmd = util.get_python_interpreter()
-		lint.linters.pylint.args = { "-m", "pylint", "-f", "json" }
 
 		lint.linters.eslint_d.cwd = function(params)
 			local fname = params.bufname

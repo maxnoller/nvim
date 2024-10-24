@@ -25,14 +25,14 @@ return {
 
 		local mason_lspconfig = require("mason-lspconfig").setup({
 			ensure_installed = {
-				"tsserver",
+				"ts_ls",
 				"html",
 				"cssls",
 				"tailwindcss",
-				"lua_ls",
 				"svelte",
 				"lua_ls",
 				"basedpyright",
+				"ruff",
 			},
 			handlers = {
 				function(server_name)
@@ -50,6 +50,17 @@ return {
 								diagnostics = {
 									globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
 								},
+							},
+						},
+					})
+				end,
+				["ruff"] = function()
+					require("lspconfig").ruff.setup({
+						-- cmd = { "ruff", "server", "--preview" },
+						cmd_env = { RUFF_TRACE = "messages" },
+						init_option = {
+							settings = {
+								loglevel = "error",
 							},
 						},
 					})
