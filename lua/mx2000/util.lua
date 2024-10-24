@@ -25,12 +25,20 @@ function M.find_pyproject_toml(start_path)
 end
 
 function M.get_python_interpreter(file_path)
+	-- Check for VIRTUAL_ENV
 	if vim.env.VIRTUAL_ENV then
 		return interpreter_os(vim.env.VIRTUAL_ENV)
 	end
 
 	local project_root = M.find_pyproject_toml(vim.fn.fnamemodify(file_path, ":p:h"))
 	if project_root then
+		-- Check for uv
+		local uv_venv = path_join(project_root, ".venv")
+		if vim.fn.isdirectory(uv_venv) == 1 then
+			return interpreter_os(uv_venv)
+		end
+
+		-- Check for poetry
 		local poetry_lock = path_join(project_root, "poetry.lock")
 		if vim.fn.filereadable(poetry_lock) == 1 then
 			local venv = vim.fn.trim(vim.fn.system("cd " .. project_root .. " && poetry env info -p"))

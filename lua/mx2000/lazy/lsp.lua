@@ -49,7 +49,7 @@ return {
 					},
 				})
 			end,
-			["pyright"] = function()
+			["basedpyright"] = function()
 				lspconfig.pyright.setup({
 					capabilities = capabilities,
 					on_init = function(client)
