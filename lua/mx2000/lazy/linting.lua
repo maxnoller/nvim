@@ -20,6 +20,10 @@ return {
 		lint.linters.pylint.cmd = util.get_python_interpreter()
 		lint.linters.pylint.args = { "-m", "pylint", "-f", "json" }
 
+		lint.linters.eslint_d.cwd = function(params)
+			local fname = params.bufname
+			return vim.fn.fnamemodify(fname, ":h")
+		end
 		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
 			group = lint_augroup,
 			callback = function()
