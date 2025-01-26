@@ -19,7 +19,6 @@ vim.api.nvim_create_autocmd({ "FocusLost" }, {
 	pattern = { "*" },
 	command = [[call setreg("+", getreg("@"))]],
 })
-vim.g["codegpt_openai_api_key"] = vim.fn.system("bw get password OAI_API_KEY")
 autocmd("LspAttach", {
 	group = MX2000_GROUP,
 	callback = function(e)
